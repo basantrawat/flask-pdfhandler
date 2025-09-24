@@ -1,7 +1,0 @@
-Werkzeug==0.16.1
-Flask==1.1.1
-PyPDF2==1.26.0
-
-
-# To Install all Requirements
-# pip install -r requirements.txt
