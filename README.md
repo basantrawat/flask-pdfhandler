@@ -15,6 +15,14 @@ A web-based application that provides various tools for PDF manipulation.
 *   **PDF to Word:** Convert a PDF file into an editable Word document.
 *   **User Authentication:** Secure user registration and login system.
 
+## Screenshots
+
+**Home Page**  
+<img src="bin/homepage.jpg" alt="Home Screen" width="75%" />
+
+**Merge PDFs**  
+<img src="bin/merge_page.jpg" alt="Merge PDF page" width="75%" />
+
 ## Installation
 
 1.  **Clone the repository:**
