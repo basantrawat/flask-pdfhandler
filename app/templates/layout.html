@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}PDF Tools📝{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text x='0' y='14'>📝</text></svg>" />
+    <style>
+        body { font-family: 'Ysabeau', sans-serif; min-height: 100vh}
+        .tool-card { transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out; }
+        .tool-card:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        .disabled-card { opacity: 0.5; cursor: not-allowed; background-color: #f3f4f6; }
+        .disabled-card:hover { transform: none; box-shadow: none; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    </style>
+
+    <!-- PDF Tools Icon Sprite (24x24, stroke-only) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none" class="h-12 w-12 mx-auto" fill="none" stroke="currentColor">
+        <!-- Base rounded-rect frame reused in each symbol -->
+        <symbol id="icon-frame" viewBox="0 0 24 24">
+            <rect x="4" y="4" width="16" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/>
+        </symbol>
+
+
+        <!-- SPLIT -->
+        <symbol id="icon-split" viewBox="0 0 24 24" fill="white">
+            <use href="#icon-frame"/>
+            <!-- <path d="M12 16V8m0 0l-4-4m4 4l4-4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/> -->
+            <g transform="translate(5.5,5.5) scale(0.28)">
+                <path d="M4 14V5C4 4.44772 4.44772 4 5 4H19C19.5523 4 20 4.44772 20 5V43C20 43.5523 19.5523 44 19 44H5C4.44772 44 4 43.5523 4 43V34" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M44 34V43C44 43.5523 43.5523 44 43 44H29C28.4477 44 28 43.5523 28 43V5C28 4.44772 28.4477 4 29 4H43C43.5523 4 44 4.44772 44 5V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M28 24L44 24.0132" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M4 24.0132L20 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M39.2275 28.7779L40.8185 27.1869L44.0005 24.0049L40.8185 20.8229L39.2275 19.232" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M8.75537 28.7862L7.16438 27.1952L3.9824 24.0132L7.16438 20.8313L8.75537 19.2403" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+        </symbol>
+
+        <!-- COMPRESS (inward arrows)-->
+        <symbol id="icon-compress" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <path d="M6 6l3 3m0 0h-3m3 0v-3M18 6l-3 3m0 0h3m-3 0v-3M6 18l3-3m0 0h-3m3 0v3M18 18l-3-3m0 0h3m-3 0v3"  stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+
+        <!-- MERGE (two to one) -->
+        <symbol id="icon-merge" viewBox="0 0 24 24" fill="white">
+            <use href="#icon-frame"/>
+            <!-- <path d="M8 8l4 4m4-4l-4 4m0 0v4" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/> -->
+            <g transform="translate(5.5,5.5) scale(0.28)">
+                <path d="M20 14V5C20 4.44772 19.5523 4 19 4H5C4.44772 4 4 4.44772 4 5V43C4 43.5523 4.44772 44 5 44H19C19.5523 44 20 43.5523 20 43V34" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M28 34V43C28 43.5523 28.4477 44 29 44H43C43.5523 44 44 43.5523 44 43V5C44 4.44772 43.5523 4 43 4H29C28.4477 4 28 4.44772 28 5V14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M28 24H44" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M5 24H20" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                <path d="M32.7485 28.8183L31.1575 27.2274L27.9756 24.0454L31.1575 20.8634L32.7485 19.2724" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M15.375 28.8183L16.966 27.2274L20.148 24.0454L16.966 20.8634L15.375 19.2724" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </g>
+        </symbol>
+
+        <!-- ROTATE (clockwise) -->
+        <symbol id="icon-rotate" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <!-- <path d="M14.5 7.5h3v3M7.5 14a4.5 4.5 0 1 0 7.5-3.5" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/> -->
+            <g transform="translate(5,5.5) scale(0.6)">
+                <path d="M6.34234829,5 L3.5,5 C3.22385763,5 3,4.77614237 3,4.5 C3,4.22385763 3.22385763,4 3.5,4 L7.5,4 C7.77614237,4 8,4.22385763 8,4.5 L8,8.5 C8,8.77614237 7.77614237,9 7.5,9 C7.22385763,9 7,8.77614237 7,8.5 L7,5.754353 C5.12534543,7.25566058 4,9.53220768 4,12 C4,16.418278 7.581722,20 12,20 C16.418278,20 20,16.418278 20,12 C20,7.75561002 16.684877,4.25604977 12.4672193,4.01340168 C12.1915328,3.99754103 11.9809023,3.76119536 11.996763,3.48550885 C12.0126236,3.20982234 12.2489693,2.99919187 12.5246558,3.01505252 C17.2706793,3.28809828 21,7.22490011 21,12 C21,16.9705627 16.9705627,21 12,21 C7.02943725,21 3,16.9705627 3,12 C3,9.23851765 4.2535362,6.68868786 6.34234829,5 Z" stroke="currentColor" fill="currentColor" stroke-width="0.2" stroke-linecap="round"/>
+            </g>
+        </symbol>
+
+        <!-- LOCK -->
+        <symbol id="icon-lock" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(1.5,1.5) scale(0.9)">
+                <path d="M8 11V9a4 4 0 1 1 8 0v2M8 11h8v7H8v-7z" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M12 14v2" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/>
+            </g>
+        </symbol>
+
+        <!-- UNLOCK -->
+        <symbol id="icon-unlock" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(1.5,1.5) scale(0.9)">
+                <path d="M16 11V9a4 4 0 1 0-8 0" fill="none" stroke="currentColor" stroke-width="0.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <rect x="8" y="11" width="8" height="7" fill="none" stroke="currentColor" stroke-width="0.6" rx="1"/>
+                <path d="M12 14v2" stroke="currentColor" stroke-width="0.6" stroke-linecap="round"/>
+            </g>
+        </symbol>
+
+        <!-- CONVERT / PDF ➜ JPG (doc to image) -->
+        <symbol id="icon-pdf-to-jpg" viewBox="0 0 24 24" fill="white">
+            <use href="#icon-frame"/>
+            <!-- left doc -->
+            <rect x="6.5" y="6.5" width="5" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <!-- arrow -->
+            <path d="M13 10h5m0 0l-2-2m2 2l-2 2" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <!-- right image (mountains) -->
+            <rect x="12.5" y="12.5" width="5" height="5" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <path d="M13.5 16.5l1.5-1.5 2 2m-1.5-3.5h0" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16.5" cy="13.8" r="0.6" fill="currentColor"/>
+        </symbol>
+
+        <!-- CONVERT / PDF ➜ WORD (doc to doc with text lines) -->
+        <symbol id="icon-pdf-to-word" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <rect x="6.5" y="6.5" width="5" height="7" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <path d="M13 10h5m0 0l-2-2m2 2l-2 2" stroke="currentColor" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <rect x="12.5" y="12.5" width="5" height="5" rx="0.5" fill="none" stroke="currentColor" stroke-width="0.5"/>
+            <path d="M13.5 14h3m-3 2h3" stroke="currentColor" stroke-width="0.5" stroke-linecap="round"/>
+        </symbol>
+
+        <!-- ADD PAGE NUMBERS (# badge) -->
+        <symbol id="icon-add-page-numbers" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <!-- <rect x="6.5" y="6.5" width="11" height="11" rx="1.5" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M10 10v6M14 10v6M8.5 12h7M8 14.5h8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/> -->
+            <g transform="translate(6.2,6) scale(0.8)">
+                <path d="M10.5 0.5L10.8536 0.146447L10.7071 0H10.5V0.5ZM13.5 3.5H14V3.29289L13.8536 3.14645L13.5 3.5ZM9.5 12.5L9.14645 12.1464C9.00345 12.2894 8.96067 12.5045 9.03806 12.6913C9.11545 12.8782 9.29777 13 9.5 13V12.5ZM12.5 14H2.5V15H12.5V14ZM2.5 1H10.5V0H2.5V1ZM10.1464 0.853553L13.1464 3.85355L13.8536 3.14645L10.8536 0.146447L10.1464 0.853553ZM2.5 14C2.22386 14 2 13.7761 2 13.5H1C1 14.3284 1.67157 15 2.5 15V14ZM12.5 15C13.3284 15 14 14.3284 14 13.5H13C13 13.7761 12.7761 14 12.5 14V15ZM2.5 0C1.67157 0 1 0.671573 1 1.5H2C2 1.22386 2.22386 1 2.5 1V0ZM12 12H9.5V13H12V12ZM9.85355 12.8536L11.6464 11.0607L10.9393 10.3536L9.14645 12.1464L9.85355 12.8536ZM10.7929 9H10.5V10H10.7929V9ZM10.5 9C9.67157 9 9 9.67157 9 10.5H10C10 10.2239 10.2239 10 10.5 10V9ZM12 10.2071C12 9.54044 11.4596 9 10.7929 9V10C10.9073 10 11 10.0927 11 10.2071H12ZM11.6464 11.0607C11.8728 10.8343 12 10.5273 12 10.2071H11C11 10.262 10.9782 10.3147 10.9393 10.3536L11.6464 11.0607ZM13 3.5V13.5H14V3.5H13ZM2 13.5V1.5H1V13.5H2Z" stroke="currentColor" fill="currentColor" stroke-width="0.025" stroke-linecap="round" />
+            </g>
+        </symbol>
+
+        <!-- ADD WATERMARK (stamp) -->
+        <symbol id="icon-add-watermark" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <!-- <rect x="7" y="13.5" width="10" height="3.5" rx="0.8" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M12 7a2.5 2.5 0 0 1 2.5 2.5V12h-5V9.5A2.5 2.5 0 0 1 12 7z" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/> -->
+            <g transform="translate(6,6) scale(0.2)">
+                <path d="M54.613,38.998H38.999v-6h-4v-6.242c0-2.138,0.922-4.146,2.466-5.374c2.882-2.289,4.534-5.71,4.534-9.384  c0-3.416-1.463-6.68-4.013-8.955c-2.548-2.274-5.975-3.357-9.394-2.964c-5.353,0.609-9.761,4.922-10.481,10.254  c-0.57,4.224,1.057,8.333,4.353,10.993c1.587,1.281,2.535,3.38,2.535,5.613v6.059h-4v6H5.385c-1.315,0-2.386,1.07-2.386,2.386  v11.229c0,1.315,1.07,2.386,2.386,2.386h0.705c0.478,2.833,2.942,5,5.91,5h36c2.967,0,5.431-2.167,5.91-5h0.705  c1.315,0,2.386-1.07,2.386-2.386V41.384C56.999,40.069,55.929,38.998,54.613,38.998z M23.72,19.77  c-2.747-2.217-4.103-5.645-3.626-9.169c0.6-4.438,4.27-8.026,8.726-8.535c2.899-0.326,5.681,0.547,7.835,2.47  c2.126,1.896,3.345,4.616,3.345,7.463c0,3.061-1.377,5.91-3.778,7.818c-2.048,1.628-3.222,4.157-3.222,6.939v6.242h-6V26.94  C26.999,24.066,25.804,21.452,23.72,19.77z M22.999,34.998h2h10h2v4h-14V34.998z M47.999,57.998h-36c-1.86,0-3.429-1.276-3.873-3  h43.746C51.428,56.722,49.86,57.998,47.999,57.998z M54.999,52.613c0,0.213-0.173,0.386-0.386,0.386h-0.614h-48H5.385  c-0.213,0-0.386-0.173-0.386-0.386V41.384c0-0.213,0.173-0.386,0.386-0.386h15.614h18h15.614c0.213,0,0.386,0.173,0.386,0.386  V52.613z" stroke="currentColor" fill="currentColor" stroke-width="1" stroke-linecap="round" />
+            </g>
+        </symbol>
+
+        <!-- REPAIR PDF (wrench) -->
+        <symbol id="icon-repair-pdf" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(5.5,5.5) scale(0.20)">
+                <path d="M32,18A14,14,0,1,0,46,32,14.015,14.015,0,0,0,32,18Zm0,24A10,10,0,1,1,42,32,10.011,10.011,0,0,1,32,42Z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round"  />
+                <path d="M60,25H52.837a21.838,21.838,0,0,0-1.153-2.784l5.065-5.066a2,2,0,0,0,0-2.828L49.678,7.251a2,2,0,0,0-2.828,0l-5.065,5.064A21.871,21.871,0,0,0,39,11.163V4a2,2,0,0,0-2-2H27a2,2,0,0,0-2,2v7.163a21.871,21.871,0,0,0-2.785,1.152L17.15,7.251a2,2,0,0,0-2.828,0L7.251,14.322a2,2,0,0,0,0,2.828l5.065,5.066A21.838,21.838,0,0,0,11.163,25H4a2,2,0,0,0-2,2V37a2,2,0,0,0,2,2h7.163a21.918,21.918,0,0,0,1.152,2.784L7.251,46.85a2,2,0,0,0,0,2.828l7.071,7.071a2,2,0,0,0,2.828,0l5.066-5.065A21.838,21.838,0,0,0,25,52.837V60a2,2,0,0,0,2,2H37a2,2,0,0,0,2-2V52.837a21.838,21.838,0,0,0,2.784-1.153l5.066,5.065a2,2,0,0,0,2.828,0l7.071-7.071a2,2,0,0,0,0-2.828l-5.064-5.066A21.918,21.918,0,0,0,52.837,39H60a2,2,0,0,0,2-2V27A2,2,0,0,0,60,25ZM58,35H51.345a2,2,0,0,0-1.937,1.5,17.879,17.879,0,0,1-1.915,4.626,2,2,0,0,0,.308,2.432l4.706,4.706-4.243,4.243L43.558,47.8a2,2,0,0,0-2.431-.309A17.876,17.876,0,0,1,36.5,49.408,2,2,0,0,0,35,51.345V58H29V51.345a2,2,0,0,0-1.5-1.937,17.876,17.876,0,0,1-4.627-1.916,2,2,0,0,0-2.431.309l-4.706,4.706-4.243-4.243L16.2,43.558a2,2,0,0,0,.308-2.432A17.879,17.879,0,0,1,14.592,36.5,2,2,0,0,0,12.655,35H6V29h6.655a2,2,0,0,0,1.937-1.5,17.876,17.876,0,0,1,1.916-4.627,2,2,0,0,0-.309-2.431l-4.706-4.706,4.243-4.243L20.442,16.2a2,2,0,0,0,2.432.308A17.842,17.842,0,0,1,27.5,14.592,2,2,0,0,0,29,12.655V6h6v6.655a2,2,0,0,0,1.5,1.937,17.842,17.842,0,0,1,4.626,1.915,2,2,0,0,0,2.432-.308l4.706-4.706,4.243,4.243L47.8,20.442a2,2,0,0,0-.309,2.431A17.876,17.876,0,0,1,49.408,27.5,2,2,0,0,0,51.345,29H58Z" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </g>
+        </symbol>
+
+        <!-- REMOVE PAGE FROM PDF (trash) -->
+        <symbol id="icon-remove-page" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(3,4) scale(0.06)">
+                <path d="M219.5 66.52l-29.01 -29.14c-2.65,-2.66 -6.33,-4.2 -10.09,-4.2l-84.29 0c-11.36,0 -20.6,9.25 -20.6,20.61l0 40.18c0,1.95 1.58,3.53 3.53,3.53 1.95,0 3.53,-1.58 3.53,-3.53l0 -40.18c0,-7.47 6.07,-13.55 13.54,-13.55l84.29 0c1.91,0 3.76,0.77 5.09,2.11l29.01 29.14c1.35,1.36 2.1,3.16 2.1,5.07l0 140.59c0,7.48 -6.08,13.55 -13.54,13.55l-106.95 0c-7.47,0 -13.54,-6.07 -13.54,-13.55l0 -40.15c0,-1.95 -1.58,-3.53 -3.53,-3.53 -1.95,0 -3.53,1.58 -3.53,3.53l0 40.15c0,11.36 9.24,20.6 20.6,20.6l106.95 0c11.35,0 20.59,-9.24 20.59,-20.6l0 -140.59c0,-3.79 -1.47,-7.36 -4.15,-10.04zm-132.95 81.43c0.69,0.69 1.59,1.03 2.48,1.03 0.91,0 1.81,-0.34 2.5,-1.03 1.37,-1.38 1.37,-3.61 0,-4.98l-7.5 -7.5 7.5 -7.5c1.37,-1.38 1.37,-3.6 0,-4.99 -1.38,-1.37 -3.61,-1.37 -4.98,0l-7.51 7.5 -7.5 -7.5c-1.37,-1.37 -3.6,-1.37 -4.98,0 -1.37,1.39 -1.37,3.61 0,4.99l7.49 7.5 -7.49 7.5c-1.37,1.37 -1.37,3.6 0,4.98 0.69,0.69 1.6,1.03 2.48,1.03 0.91,0 1.81,-0.34 2.5,-1.03l7.5 -7.5 7.51 7.5zm-32.23 -12.48c0,-13.62 11.1,-24.72 24.72,-24.72 13.63,0 24.73,11.1 24.73,24.72 0,13.62 -11.1,24.72 -24.73,24.72 -13.62,0 -24.72,-11.1 -24.72,-24.72zm56.5 0c0,-17.52 -14.26,-31.77 -31.78,-31.77 -17.51,0 -31.77,14.25 -31.77,31.77 0,17.51 14.26,31.77 31.77,31.77 17.52,0 31.78,-14.26 31.78,-31.77zm70.04 -89.74c-1.94,0 -3.52,1.57 -3.52,3.52l0 26.84c0,1.95 1.58,3.53 3.52,3.53l25.69 0c1.95,0 3.53,-1.58 3.53,-3.53 0,-1.95 -1.58,-3.53 -3.53,-3.53l-22.16 0 0 -23.31c0,-1.95 -1.58,-3.52 -3.53,-3.52z" fill="currentColor" stroke="currentColor" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>   
+            </g>
+        </symbol>
+
+        <!-- REDACT TEXT -->
+        <symbol id="icon-redact" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(5.5,5.5) scale(0.28)">
+                <path d="M7.45,5.5a2,2,0,0,0-1.95,2v33.1a2,2,0,0,0,2,2h33.1a2,2,0,0,0,2-2V20.41l-2.86,5L28.22,16,38.67,5.5ZM28.22,16l11.42,9.42s-3.06-.54-10.83,5.48L24.56,27.2S29.06,18.46,28.22,16ZM21.35,28.64h3.21l-2.48,3.3-.73.54a3.32,3.32,0,0,1-1.3.24,2.18,2.18,0,0,1-1.2-.3,1.57,1.57,0,0,1-.48-.48H17a1.1,1.1,0,0,1-.3.35,2,2,0,0,1-1.27.36H13.68v-.71H9.81l-.22.71H8.51v-4H9.92l.26-.74h1.23l.26.74h2v-.72h1.47a3.14,3.14,0,0,1,1.43.26.9.9,0,0,1,.4.46Zm4-.77L27.83,30l-1.49,1.93H22.08Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+            </g>
+        </symbol>
+
+        <!-- eSign TEXT -->
+        <symbol id="icon-sign" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <g transform="translate(6.5,6.5) scale(0.4)">
+                <path d="M16.4798956,21.0019578 L16.75,21 C17.9702352,21 18.6112441,21.5058032 19.4020627,22.7041662 L19.7958278,23.3124409 C20.1028266,23.766938 20.2944374,23.9573247 20.535784,24.0567929 C20.9684873,24.2351266 21.3271008,24.1474446 22.6440782,23.5133213 L23.0473273,23.3170319 C23.8709982,22.9126711 24.4330286,22.6811606 25.0680983,22.5223931 C25.4699445,22.4219316 25.8771453,22.6662521 25.9776069,23.0680983 C26.0780684,23.4699445 25.8337479,23.8771453 25.4319017,23.9776069 C25.0371606,24.0762922 24.6589465,24.2178819 24.1641364,24.4458997 L23.0054899,25.0032673 C21.4376302,25.7436944 20.9059009,25.8317321 19.964216,25.4436275 C19.3391237,25.1860028 18.9836765,24.813298 18.4635639,24.0180227 L18.2688903,23.7140849 C17.7071112,22.8288731 17.4057794,22.5384538 16.8688444,22.5036655 L16.75,22.5 C16.2017306,22.5 16.0933104,22.5684572 14.009281,24.1150241 C12.2670395,25.4079488 10.9383359,26.0254984 9.24864243,26.0254984 C7.18872869,26.0254984 5.24773367,25.647067 3.43145875,24.8905363 L6.31377803,24.2241784 C7.25769404,24.4250762 8.23567143,24.5254984 9.24864243,24.5254984 C10.5393035,24.5254984 11.609129,24.0282691 13.1153796,22.9104743 L14.275444,22.0545488 C15.5468065,21.1304903 15.8296113,21.016032 16.4798956,21.0019578 L16.4798956,21.0019578 Z M22.7770988,3.22208979 C24.4507223,4.8957133 24.4507566,7.60916079 22.7771889,9.28281324 L21.741655,10.3184475 C22.8936263,11.7199657 22.8521526,13.2053774 21.7811031,14.279556 L18.7800727,17.2805874 L18.7800727,17.2805874 C18.4870374,17.5733384 18.0121637,17.573108 17.7194126,17.2800727 C17.4266616,16.9870374 17.426892,16.5121637 17.7199273,16.2194126 L20.7188969,13.220444 C21.2039571,12.7339668 21.2600021,12.1299983 20.678941,11.3818945 L10.0845437,21.9761011 C9.78635459,22.2743053 9.41036117,22.482705 8.99944703,22.5775313 L2.91864463,23.9807934 C2.37859061,24.1054212 1.89457875,23.6214094 2.0192066,23.0813554 L3.42247794,17.0005129 C3.51729557,16.5896365 3.72566589,16.2136736 4.0238276,15.9154968 L16.7165019,3.22217992 C18.3900415,1.54855555 21.1034349,1.54851059 22.7770988,3.22208979 Z M17.7771889,4.28281324 L5.08451462,16.9761302 C4.98512738,17.0755224 4.91567061,17.2008434 4.88406473,17.3378022 L3.7506248,22.2493752 L8.66215777,21.1159445 C8.79912915,21.0843357 8.92446029,21.0148692 9.02385665,20.9154678 L21.7165019,8.22217992 C22.8043063,7.13432049 22.8042862,5.37060478 21.7164588,4.2827701 C20.6285914,3.19496507 18.8649506,3.19499653 17.7771889,4.28281324 Z" fill="currentColor" stroke="currentColor" stroke-width="0.3" stroke-linejoin="round" stroke-linecap="round" />
+            </g>
+        </symbol>
+
+
+
+        <!-- OCR PDF (eye + text lines) -->
+        <symbol id="icon-ocr-pdf" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <path d="M7 15h5M7 12h7" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            <path d="M16.5 10c1.8 0 3.3 1.1 4.5 2.5-1.2 1.4-2.7 2.5-4.5 2.5S13.2 14 12 12.5C13.2 11.1 14.7 10 16.5 10z" fill="none" stroke="currentColor" stroke-width="1"/>
+            <circle cx="16.5" cy="12.5" r="1" fill="currentColor"/>
+        </symbol>
+
+        <!-- CROP PDF -->
+        <symbol id="icon-crop-pdf" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <path d="M8 6v10a2 2 0 0 0 2 2h10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            <path d="M6 8h10a2 2 0 0 1 2 2v10" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+        </symbol>
+
+        <!-- SORT PAGES (up/down arrows) -->
+        <symbol id="icon-sort-pages" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <rect x="6.5" y="7" width="5" height="4" rx="0.5" fill="none" stroke="currentColor" stroke-width="1"/>
+            <rect x="12.5" y="13" width="5" height="4" rx="0.5" fill="none" stroke="currentColor" stroke-width="1"/>
+            <path d="M9 17V7m0 0l-2 2m2-2l2 2M15 7v10m0 0l-2-2m2 2l2-2" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/>
+        </symbol>
+
+        <!-- SCAN PDF (scanner) -->
+        <symbol id="icon-scan-pdf" viewBox="0 0 24 24">
+            <use href="#icon-frame"/>
+            <path d="M6.5 9.5h11M7 12h10M8 15h8" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            <path d="M6.5 9.5l2-4h7l2 4" fill="none" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>
+        </symbol>
+    </svg>
+</head>
+<body class="bg-gray-50 h-full flex flex-col">
+    <!-- Navbar -->
+    <nav class="bg-white shadow px-4 py-2">
+        <div class="flex items-center justify-between">
+            <!-- Left: Logo + Hamburger -->
+            <div class="flex items-center">
+                <button id="menuBtn" class="md:hidden mr-2 p-2 rounded focus:outline-none">
+                    <!-- Hamburger icon: Tailwind -->
+                    <svg class="w-7 h-7 text-gray-900" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M20 7L4 7" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M20 12L4 12" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M20 17L4 17" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                    </svg>
+                </button>
+                <!-- Logo -->
+                <a href="{{ url_for('main.index') }}">
+                    <span class="text-2xl font-bold text-black mr-2 ml-4 select-none">
+                        PDF Tools📝
+                    </span>
+                </a>
+            </div>
+            <!-- Desktop Nav Links -->
+            <ul id="navLinks" class="hidden mr-6 md:flex md:space-x-6 items-center font-semibold text-gray-800">
+                <li><a href="{{ url_for('main.tool_page', tool_name='split') }}" class="hover:text-blue-600">SPLIT</a></li>
+                <li><a href="{{ url_for('main.tool_page', tool_name='merge') }}" class="hover:text-blue-600">MERGE</a></li>
+                <li><a href="{{ url_for('main.tool_page', tool_name='compress') }}" class="hover:text-blue-600">COMPRESS</a></li>
+                <!-- CONVERT PDF Dropdown -->
+                <li class="relative group">
+                    <button class="hover:text-blue-600 flex items-center">
+                        CONVERT PDF
+                        <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <ul class="absolute left-0 pt-2 w-44 bg-white shadow-lg rounded hidden group-hover:block z-20">
+                        <li><a href="{{ url_for('main.tool_page', tool_name='pdf-to-word') }}" class="block px-4 py-2 hover:bg-gray-100">PDF to Word</a></li>
+                        <li><a href="{{ url_for('main.tool_page', tool_name='pdf-to-jpg') }}" class="block px-4 py-2 hover:bg-gray-100">PDF to JPG</a></li>
+                    </ul>
+                </li>
+                <!-- ALL PDF TOOLS Dropdown -->
+                <li class="relative group">
+                    <button class="hover:text-blue-600 flex items-center">
+                        OTHER PDF TOOLS
+                        <svg class="ml-1 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </button>
+                    <ul class="absolute left-0 pt-2 w-44 bg-white shadow-lg rounded hidden group-hover:block z-20">
+                        <li><a href="{{ url_for('main.tool_page', tool_name='merge') }}" class="block px-4 py-2 hover:bg-gray-100">Merge PDF</a></li>
+                        <li><a href="{{ url_for('main.tool_page', tool_name='split') }}" class="block px-4 py-2 hover:bg-gray-100">Split PDF</a></li>
+                        <li><a href="{{ url_for('main.tool_page', tool_name='compress') }}" class="block px-4 py-2 hover:bg-gray-100">Compress PDF</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Mobile Nav Links (hidden by default)-->
+        <div id="mobileMenu" class="md:hidden hidden mt-2">
+            <ul class="space-y-2 font-semibold text-gray-800">
+                <li><a href="{{ url_for('main.tool_page', tool_name='merge') }}" class="block px-3 py-2 hover:bg-gray-100 rounded">MERGE PDF</a></li>
+                <li><a href="{{ url_for('main.tool_page', tool_name='split') }}" class="block px-3 py-2 hover:bg-gray-100 rounded">SPLIT PDF</a></li>
+                <li><a href="{{ url_for('main.tool_page', tool_name='compress') }}" class="block px-3 py-2 hover:bg-gray-100 rounded">COMPRESS PDF</a></li>
+                <!-- Dropdowns for mobile—just show as links for simplicity -->
+                <li>
+                    <details>
+                        <summary class="px-3 py-2 hover:bg-gray-100 rounded cursor-pointer">CONVERT PDF</summary>
+                        <ul>
+                            <li><a href="{{ url_for('main.tool_page', tool_name='pdf-to-word') }}" class="block px-6 py-2 hover:bg-gray-100">PDF to Word</a></li>
+                            <li><a href="{{ url_for('main.tool_page', tool_name='pdf-to-jpg') }}" class="block px-6 py-2 hover:bg-gray-100">PDF to PowerPoint</a></li>
+                        </ul>
+                    </details>
+                </li>
+                <li>
+                    <details>
+                        <summary class="px-3 py-2 hover:bg-gray-100 rounded cursor-pointer">ALL PDF TOOLS</summary>
+                        <ul>
+                            <li><a href="{{ url_for('main.tool_page', tool_name='merge') }}" class="block px-6 py-2 hover:bg-gray-100">Merge PDF</a></li>
+                            <li><a href="{{ url_for('main.tool_page', tool_name='split') }}" class="block px-6 py-2 hover:bg-gray-100">Split PDF</a></li>
+                            <li><a href="{{ url_for('main.tool_page', tool_name='compress') }}" class="block px-6 py-2 hover:bg-gray-100">Compress PDF</a></li>
+                        </ul>
+                    </details>
+                </li>
+            </ul>
+        </div>
+
+    </nav>
+
+
+    <main class="flex-grow">
+        <div class="container mx-auto px-4 py-8 md:py-12">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    <footer class="bg-gray-100 border-t">
+        <div class="container mx-auto px-4 py-4 text-center text-sm text-gray-500">
+            &copy; 2025 PDF Power Tools. All rights reserved.
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+
+</body>
+</html>
