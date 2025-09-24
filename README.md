@@ -18,26 +18,26 @@ A web-based application that provides various tools for PDF manipulation.
 ## Installation
 
 1.  **Clone the repository:**
-    ```bash
-    git clone <repository-url>
+    ```
+    git clone https://github.com/basantrawat/flask-pdfhandler.git
     cd pdf_tools_modular
     ```
 
 2.  **Create a virtual environment and activate it:**
-    ```bash
+    ```
     python -m venv venv
-    source venv/bin/activate  # On Windows, use `venv\Scripts\activate`
+    venv\Scripts\activate
     ```
 
 3.  **Install the dependencies:**
-    ```bash
+    ```
     pip install -r requirements.txt
     ```
 
 ## Usage
 
 1.  **Run the application:**
-    ```bash
+    ```
     python run.py
     ```
 
